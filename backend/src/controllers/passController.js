@@ -51,7 +51,8 @@ const createPass = async (req, res) => {
 const approvePass = async (req, res) => {
   try {
     const { id } = req.params;
-    const { approved_by_user_id, remarks } = req.body;
+
+    const approved_by_user_id = req.user.id;
 
     const qrToken = `PASS_${id}`;
 
@@ -69,43 +70,18 @@ const approvePass = async (req, res) => {
       `INSERT INTO approvals
        (pass_id, approved_by_user_id, status, remarks)
        VALUES ($1, $2, 'approved', $3)`,
-      [id, approved_by_user_id, remarks]
+      [id, approved_by_user_id, "Approved by Superintendent"]
     );
 
-    res.status(200).json(updatedPass.rows[0]);
+    res.status(200).json({
+      message: "Pass approved successfully",
+      pass: updatedPass.rows[0],
+    });
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       message: "Failed to approve pass",
-      error: error.message,
-    });
-  }
-};
-
-const rejectPass = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { approved_by_user_id, remarks } = req.body;
-
-    const updatedPass = await pool.query(
-      `UPDATE passes
-       SET status = 'rejected',
-           approved_by_user_id = $1
-       WHERE id = $2
-       RETURNING *`,
-      [approved_by_user_id, id]
-    );
-
-    await pool.query(
-      `INSERT INTO approvals
-       (pass_id, approved_by_user_id, status, remarks)
-       VALUES ($1, $2, 'rejected', $3)`,
-      [id, approved_by_user_id, remarks]
-    );
-
-    res.status(200).json(updatedPass.rows[0]);
-  } catch (error) {
-    res.status(500).json({
-      message: "Failed to reject pass",
       error: error.message,
     });
   }
@@ -115,5 +91,4 @@ module.exports = {
   getPasses,
   createPass,
   approvePass,
-  rejectPass,
 };

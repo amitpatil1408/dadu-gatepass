@@ -7,12 +7,15 @@ function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
   const [showApplyForm, setShowApplyForm] = useState(false);
   const [destination, setDestination] = useState("");
 const [reason, setReason] = useState("");
 const [passes, setPasses] = useState([]);
 const [showPasses, setShowPasses] = useState(false);
 const [showQR, setShowQR] = useState(false);
+const [pendingPasses, setPendingPasses] = useState([]);
+const [showPendingPasses, setShowPendingPasses] = useState(false);
 const handleLogin = async (e) => {
   e.preventDefault();
 
@@ -35,8 +38,10 @@ const handleLogin = async (e) => {
 
     if (response.ok) {
       localStorage.setItem("token", data.token);
-      setIsLoggedIn(true);
 
+setUser(data.user);
+
+setIsLoggedIn(true);
       console.log(data);
     } else {
       alert(data.message);
@@ -104,7 +109,78 @@ const handleLogin = async (e) => {
     alert("Failed to fetch passes");
   }
 };
+const fetchPendingPasses = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/passes"
+    );
 
+    const data = await response.json();
+
+    const pending = data.filter(
+      (pass) => pass.status === "pending"
+    );
+
+    setPendingPasses(pending);
+
+    setShowPendingPasses(true);
+  } catch (error) {
+    console.error(error);
+
+    alert("Failed to fetch pending passes");
+  }
+};
+const approvePass = async (passId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `http://localhost:5000/api/passes/${passId}/approve`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    alert(data.message);
+
+    fetchPendingPasses();
+  } catch (error) {
+    console.error(error);
+
+    alert("Failed to approve pass");
+  }
+};
+
+const rejectPass = async (passId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `http://localhost:5000/api/passes/${passId}/reject`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    alert(data.message);
+
+    fetchPendingPasses();
+  } catch (error) {
+    console.error(error);
+
+    alert("Failed to reject pass");
+  }
+};
   return (
     <>
       {!isLoggedIn ? (
@@ -197,12 +273,12 @@ const handleLogin = async (e) => {
   DADU GatePass Dashboard
 </h1>
 
-          <h2
+         <h2
   style={{
     color: "white",
   }}
 >
-  Welcome Amit Patil
+  Welcome {user?.name}
 </h2>
 
           <div
@@ -218,13 +294,18 @@ const handleLogin = async (e) => {
                 setShowApplyForm(true);
               }}
             >
+
               Apply New Pass
             </button>
 
             <button onClick={fetchMyPasses}>
   My Passes
 </button>
-
+{user?.role_id === 5 && (
+  <button onClick={fetchPendingPasses}>
+    Pending Requests
+  </button>
+)}
             <button
   onClick={() => {
     setShowQR(true);
@@ -393,7 +474,79 @@ const handleLogin = async (e) => {
     </p>
   </div>
 )}
+{showPendingPasses && (
+  <div
+    style={{
+      marginTop: "30px",
+      background: "white",
+      padding: "20px",
+      borderRadius: "10px",
+      color: "black",
+      maxWidth: "900px",
+    }}
+  >
+    <h2>Pending Requests</h2>
 
+    {pendingPasses.map((pass) => (
+      <div
+        key={pass.id}
+        style={{
+          border: "1px solid #ddd",
+          padding: "15px",
+          marginBottom: "10px",
+        }}
+      >
+        <p>
+          <strong>ID:</strong> {pass.id}
+        </p>
+
+        <p>
+          <strong>Destination:</strong> {pass.destination}
+        </p>
+
+        <p>
+          <strong>Reason:</strong> {pass.reason}
+        </p>
+        <div
+  style={{
+    marginTop: "15px",
+    display: "flex",
+    gap: "10px",
+    justifyContent: "center",
+  }}
+>
+  <button
+    onClick={() => approvePass(pass.id)}
+    style={{
+      backgroundColor: "green",
+      color: "white",
+      border: "none",
+      padding: "8px 15px",
+      cursor: "pointer",
+      borderRadius: "5px",
+    }}
+  >
+    Approve
+  </button>
+
+  <button
+    onClick={() => rejectPass(pass.id)}
+    style={{
+      backgroundColor: "red",
+      color: "white",
+      border: "none",
+      padding: "8px 15px",
+      cursor: "pointer",
+      borderRadius: "5px",
+    }}
+  >
+    Reject
+  </button>
+</div>
+      </div>
+    ))}
+  </div>
+)}
         </div>
       )}
     </>
