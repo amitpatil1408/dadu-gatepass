@@ -43,6 +43,24 @@ const scanPass = async (req, res) => {
   }
 };
 
+const getGateLogs = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT *
+       FROM gate_logs
+       ORDER BY created_at DESC`
+    );
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch gate logs",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   scanPass,
+  getGateLogs,
 };
