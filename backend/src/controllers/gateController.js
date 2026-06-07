@@ -22,6 +22,13 @@ const scanPass = async (req, res) => {
         message: "Pass is not approved",
       });
     }
+    const now = new Date();
+
+if (now > new Date(pass.expected_in_time)) {
+  return res.status(400).json({
+    message: "Pass has expired",
+  });
+}
 
     const logResult = await pool.query(
       `INSERT INTO gate_logs
