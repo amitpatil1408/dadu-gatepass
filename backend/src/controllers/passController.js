@@ -1,4 +1,5 @@
 const pool = require("../config/db");
+const crypto = require("crypto");
 
 const getPasses = async (req, res) => {
   try {
@@ -54,7 +55,7 @@ const approvePass = async (req, res) => {
 
     const approved_by_user_id = req.user.id;
 
-    const qrToken = `PASS_${id}`;
+    const qrToken = crypto.randomBytes(16).toString("hex");
 
     const updatedPass = await pool.query(
       `UPDATE passes
