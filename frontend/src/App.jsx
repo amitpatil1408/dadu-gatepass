@@ -14,8 +14,11 @@ const [reason, setReason] = useState("");
 const [passes, setPasses] = useState([]);
 const [showPasses, setShowPasses] = useState(false);
 const [showQR, setShowQR] = useState(false);
+const [selectedQRToken, setSelectedQRToken] = useState("");
 const [pendingPasses, setPendingPasses] = useState([]);
 const [showPendingPasses, setShowPendingPasses] = useState(false);
+const [showGateScanner, setShowGateScanner] = useState(false);
+const [scanToken, setScanToken] = useState("");
 const handleLogin = async (e) => {
   e.preventDefault();
 
@@ -99,10 +102,19 @@ setIsLoggedIn(true);
     );
 
     const data = await response.json();
+setPasses(data);
 
-    setPasses(data);
+const approvedPasses = data.filter(
+  (pass) => pass.status === "approved" && pass.qr_token
+);
 
-    setShowPasses(true);
+if (approvedPasses.length > 0) {
+  setSelectedQRToken(
+    approvedPasses[approvedPasses.length - 1].qr_token
+  );
+}
+
+setShowPasses(true);
   } catch (error) {
     console.error(error);
 
@@ -155,7 +167,32 @@ const approvePass = async (passId) => {
     alert("Failed to approve pass");
   }
 };
+const scanPassAtGate = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/gate/scan",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          qr_token: scanToken,
+          action: "exit",
+          scanned_by_user_id: 3,
+        }),
+      }
+    );
 
+    const data = await response.json();
+
+    alert(data.message);
+  } catch (error) {
+    console.error(error);
+
+    alert("Gate scan failed");
+  }
+};
 const rejectPass = async (passId) => {
   try {
     const token = localStorage.getItem("token");
@@ -306,12 +343,20 @@ const rejectPass = async (passId) => {
     Pending Requests
   </button>
 )}
-            <button
+           <button
   onClick={() => {
+    fetchMyPasses();
     setShowQR(true);
   }}
 >
   View QR Pass
+</button>
+<button
+  onClick={() => {
+    setShowGateScanner(true);
+  }}
+>
+  Gate Scanner
 </button>
 
             <button
@@ -455,10 +500,9 @@ const rejectPass = async (passId) => {
     marginTop: "10px",
   }}
 >
-  <QRCode
-    value="PASS_3"
-  
-  />
+ <QRCode
+  value={selectedQRToken}
+/>
 </div>
 <p
   style={{
@@ -467,11 +511,41 @@ const rejectPass = async (passId) => {
     color: "#2563eb",
   }}
 >
-  PASS_3
+  {selectedQRToken}
 </p>
     <p>
       Show this QR token at the gate.
     </p>
+  </div>
+)}
+{showGateScanner && (
+  <div
+    style={{
+      marginTop: "30px",
+      background: "white",
+      padding: "20px",
+      borderRadius: "10px",
+      color: "black",
+      maxWidth: "500px",
+    }}
+  >
+    <h2>Gate Scanner</h2>
+
+    <input
+      type="text"
+      placeholder="Enter QR Token"
+      value={scanToken}
+      onChange={(e) => setScanToken(e.target.value)}
+      style={{
+        width: "100%",
+        padding: "10px",
+        marginBottom: "10px",
+      }}
+    />
+
+    <button onClick={scanPassAtGate}>
+      Verify Pass
+    </button>
   </div>
 )}
 {showPendingPasses && (
