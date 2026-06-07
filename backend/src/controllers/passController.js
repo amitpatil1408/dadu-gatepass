@@ -86,9 +86,44 @@ const approvePass = async (req, res) => {
     });
   }
 };
+const rejectPass = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const approved_by_user_id = req.user.id;
+
+    const updatedPass = await pool.query(
+      `UPDATE passes
+       SET status = 'rejected',
+           approved_by_user_id = $1
+       WHERE id = $2
+       RETURNING *`,
+      [approved_by_user_id, id]
+    );
+
+    await pool.query(
+      `INSERT INTO approvals
+       (pass_id, approved_by_user_id, status, remarks)
+       VALUES ($1, $2, 'rejected', $3)`,
+      [id, approved_by_user_id, "Rejected by Superintendent"]
+    );
+
+    res.status(200).json({
+      message: "Pass rejected successfully",
+      pass: updatedPass.rows[0],
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to reject pass",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
   getPasses,
   createPass,
   approvePass,
+  rejectPass,
 };
