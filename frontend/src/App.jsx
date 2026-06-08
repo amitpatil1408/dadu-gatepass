@@ -125,13 +125,15 @@ const rejected = data.filter(
 setApprovedCount(approved);
 setPendingCount(pending);
 setRejectedCount(rejected);
-const approvedPasses = data.filter(
-  (pass) => pass.status === "approved" && pass.qr_token
-);
+const approvedPasses = data
+  .filter(
+    (pass) => pass.status === "approved" && pass.qr_token
+  )
+  .sort((a, b) => b.id - a.id);
 
 if (approvedPasses.length > 0) {
   setSelectedQRToken(
-    approvedPasses[approvedPasses.length - 1].qr_token
+    approvedPasses[0].qr_token
   );
 }
 
