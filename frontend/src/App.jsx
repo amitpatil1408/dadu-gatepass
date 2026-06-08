@@ -279,36 +279,50 @@ const rejectPass = async (passId) => {
   return (
     <>
       {!isLoggedIn ? (
+       <div
+  style={{
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundImage: "url('/bits-campus.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  }}
+>
         <div
-          style={{
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#f4f6f8",
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              padding: "30px",
-              borderRadius: "10px",
-              width: "350px",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            }}
-          >
+  style={{
+    background: "rgba(30,41,59,0.92)",
+    padding: "35px",
+    borderRadius: "15px",
+    width: "380px",
+    boxShadow: "0 8px 25px rgba(0,0,0,0.4)",
+    backdropFilter: "blur(8px)",
+  }}
+>
            <h1
   style={{
     textAlign: "center",
-    color: "#1e293b",
+    color: "white",
     fontSize: "48px",
     lineHeight: "1.2",
-    marginBottom: "25px",
+    marginBottom: "10px",
     fontWeight: "bold",
   }}
 >
   DADU GatePass
 </h1>
+
+<p
+  style={{
+    textAlign: "center",
+    color: "#cbd5e1",
+    marginBottom: "25px",
+  }}
+>
+  BITS Pilani Hyderabad Campus
+</p>
 
             <form onSubmit={handleLogin}>
               <div style={{ marginBottom: "15px" }}>
@@ -342,13 +356,19 @@ const rejectPass = async (passId) => {
               </div>
 
               <button
-                type="submit"
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  cursor: "pointer",
-                }}
-              >
+  type="submit"
+  style={{
+    width: "100%",
+    padding: "12px",
+    cursor: "pointer",
+    background: "#2563eb",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "bold",
+    fontSize: "16px",
+  }}
+>
                 Login
               </button>
             </form>
@@ -712,7 +732,17 @@ justifyContent: "center",
               }}
             >
              
-              <h2>My Passes</h2>
+              <h2
+  style={{
+    textAlign: "center",
+    color: "#1e293b",
+    marginBottom: "20px",
+    fontSize: "32px",
+    fontWeight: "bold",
+  }}
+>
+  My Passes
+</h2>
 
               <table
                 style={{
@@ -824,7 +854,17 @@ justifyContent: "center",
       maxWidth: "500px",
     }}
   >
-    <h2>Gate Scanner</h2>
+  <h2
+  style={{
+    textAlign: "center",
+    color: "#1e293b",
+    marginBottom: "20px",
+    fontSize: "32px",
+    fontWeight: "bold",
+  }}
+>
+  Gate Scanner
+</h2>
 
     <input
       type="text"
